@@ -1629,6 +1629,7 @@ begin
 declare v_cont_data int default 0;
 declare v_cont_resto int default 0;
 declare v_cont_total int default 0;
+declare v_resposta varchar (100) default "";
 
 set v_cont_data = (select count(column_name) from information_schema.columns
 where table_name = tabela and table_schema="bd2024" and data_type in ('date')
@@ -1640,10 +1641,13 @@ group by table_name);
 
 set v_cont_total = (v_cont_data*10)+ v_cont_resto;
 
-select concat("A quantidade de ncaracteres é: ",v_cont_total);
+set v_resposta = concat("A quantidade de caracteres da tabela ",tabela," é: ",v_cont_total);
+
+select v_resposta;
 
 end ##
 delimiter ;
+
 
 
 delimiter ##
