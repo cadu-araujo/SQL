@@ -486,7 +486,7 @@ select * from pet_tipo;
 delimiter ##
 create procedure sp_inserepet(nome varchar(65), sexo char(1), castrado enum('castrado','não castrado','não sei'), dtnascto date, peso float, pessoa int, porte int, raca int, tipo int)
 begin
-if(pessoa in (select pesid from pessoa)) then
+if(pessoa in (select pesid from pessoa)or pessoa=0) then
 	if(porte in (select ptpid from pet_porte)) then
 		if (raca in (select ptrid from pet_raca)) then
 			if (tipo in (select pttid from pet_tipo)) then
@@ -511,7 +511,7 @@ delimiter ;
 delimiter ##
 create procedure sp_alterapet(nome varchar(65), sexo char(1), castrado enum('castrado','não castrado','não sei'), dtnascto date, peso float, pessoa int, porte int, raca int, tipo int, cod int)
 begin
-if(pessoa in (select pesid from pessoa)) then
+if(pessoa in (select pesid from pessoa) or pessoa = 0) then
 	if(porte in (select ptpid from pet_porte)) then
 		if (raca in (select ptrid from pet_raca)) then
 			if (tipo in (select pttid from pet_tipo)) then
