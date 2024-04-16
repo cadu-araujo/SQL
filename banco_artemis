@@ -483,6 +483,8 @@ select * from pet_porte;
 select * from pet_raca;
 select * from pet_tipo;
 
+
+
 delimiter ##
 create procedure sp_inserepet(nome varchar(65), sexo char(1), castrado enum('castrado','não castrado','não sei'), dtnascto date, peso float, pessoa int, porte int, raca int, tipo int)
 begin
@@ -615,17 +617,6 @@ delimiter ;
 
 
 delimiter ##
-create trigger tg_excluifts
-before delete on pet
-for each row
-begin
-delete from pet_foto
-where pet_petid = old.petid;
-end##
-delimiter ;
-
-
-delimiter ##
 create procedure sp_insere_ong (nome varchar(100), cidade varchar(100), bairro varchar(100), rua varchar(100), num int, telefone varchar(100), email varchar(100))
 begin
 	if (email like '%@%') then
@@ -647,5 +638,115 @@ begin
     else
       select "E-mail inválido";
     end if;
+end##
+delimiter ;
+
+
+select * from auth_user_user_permissions;
+show create table auth_permission;
+
+Alter table ong
+add ongestado varchar (45) not null;
+
+Alter table petshop
+add ptsestado varchar (45) not null;
+
+
+
+delimiter ##
+create procedure sp_excluiong(cod int)
+begin
+
+if (cod in (select ongid from ong)) then
+	delete from ong
+	where ongid = cod;
+else
+	select "Ong não existe";
+end if;
+
+end##
+delimiter ;
+
+
+delimiter ##
+create procedure sp_exclui_petshop(cod int)
+begin
+
+if (cod in (select ptsid from petshop)) then
+	delete from petshop
+	where ptsid = cod;
+else
+	select "Pethop não existe";
+end if;
+
+end##
+delimiter ;
+
+
+delimiter ##
+create trigger tg_exclui_pet
+before delete on pet
+for each row
+begin
+
+delete from pet_foto
+where pet_petid = old.petid;
+
+delete from pet_adocao
+where pet_petid = old.petid;
+
+end##
+delimiter ;
+
+
+delimiter ##
+create trigger tg_exclui_ong
+before delete on ong
+for each row
+begin
+
+
+delete from pet_adocao
+where ong_ongid = old.ongid;
+
+end##
+delimiter ;
+
+
+delimiter ##
+create trigger tg_exclui_pessoa
+before delete on pessoa
+for each row
+begin
+
+
+delete from venda
+where venpessoa_pesid = old.pesid;
+
+
+delete from servico
+where pessoa_pesid = old.pesid;
+
+end##
+delimiter ;
+
+
+delimiter ##
+create trigger tg_exclui_petshop
+before delete on petshop
+for each row
+begin
+
+
+delete from venda
+where venpetshop_ptsid = old.ptsid;
+
+
+delete from servico
+where petshop_ptsid = old.ptsid;
+
+delete from produto
+where propetshop_ptsid = old.ptsid;
+
 end##
 delimiter ;
