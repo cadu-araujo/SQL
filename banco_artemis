@@ -43,6 +43,9 @@ CREATE TABLE IF NOT EXISTS `artemis`.`pessoa` (
   UNIQUE INDEX `pescpf_UNIQUE` (`pescpf` ASC) VISIBLE)
 ENGINE = InnoDB;
 
+alter table pessoa
+drop column estado ;
+
 
 -- -----------------------------------------------------
 -- Table `artemis`.`pet_porte`
@@ -564,7 +567,7 @@ select * from pet;
 call sp_excluipet(6);
 
 delimiter ##
-create procedure sp_inserepessoa(cpf varchar(12), dtnascto date, sexo char(1), cidade varchar(70), bairro varchar(70), rua varchar(70), email varchar(70), numero int, telefone varchar(12), nome varchar(70), estado varchar(70))
+create procedure sp_inserepessoa(cpf varchar(12), dtnascto date, sexo char(1),  cidade varchar(70), bairro varchar(70), rua varchar(70), email varchar(70), numero int, telefone varchar(12), nome varchar(70), estado varchar(70))
 begin
 
 insert into pessoa (pescpf,pesdtnascto,pessexo,pescidade,pesbairro,pesrua,pesemail,pesnumero,pestelefone,pesnome,pesestado)
@@ -617,11 +620,11 @@ delimiter ;
 
 
 delimiter ##
-create procedure sp_insere_ong (nome varchar(100), cidade varchar(100), bairro varchar(100), rua varchar(100), num int, telefone varchar(100), email varchar(100))
+create procedure  sp_insere_ong  (nome varchar(100), estado varchar(45), cidade varchar(100), bairro varchar(100), rua varchar(100), num int, telefone varchar(100), email varchar(100))
 begin
 	if (email like '%@%') then
-     insert into ong (ongnome,ongcidade,ongbairro,ongrua,ongnum,ongtelefone,ongemail) values
-     (nome, cidade, bairro, rua, num, telefone, email);
+     insert into ong (ongnome,ongestado, ongcidade,ongbairro,ongrua,ongnum,ongtelefone,ongemail) values
+     (nome, estado, cidade, bairro, rua, num, telefone, email);
     else
       select "E-mail inválido";
     end if;
@@ -629,28 +632,25 @@ begin
 end##
 delimiter ;
 
+
+
 delimiter ##
-create procedure sp_insere_petshop (nome varchar(100), cnpj varchar (14),cidade varchar(100), bairro varchar(100), rua varchar(100), num int, telefone varchar(100), email varchar(100))
+create procedure sp_alteraong(nome varchar(70), estado varchar(45), cidade varchar(70), bairro varchar(70), rua varchar(70), email varchar(70), numero int, telefone varchar(12), cod int)
 begin
-	if (email like '%@%') then
-     insert into petshop (ptsnome,ptscnpj,ptscidade,ptsbairro,ptsrua,ptsnumero,ptstelefone,ptsemail) values
-     (nome,cnpj, cidade, bairro, rua, num, telefone, email);
-    else
-      select "E-mail inválido";
-    end if;
+
+	update ong 
+	set ongnome=nome,
+	ongcidade=cidade,
+	ongbairro=bairro,
+	ongrua=rua,
+	ongemail=email,
+	ongnum=numero,
+	ongtelefone=telefone,
+	ongestado=estado
+	where cod=ongid;
+
 end##
 delimiter ;
-
-
-select * from auth_user_user_permissions;
-show create table auth_permission;
-
-Alter table ong
-add ongestado varchar (45) not null;
-
-Alter table petshop
-add ptsestado varchar (45) not null;
-
 
 
 delimiter ##
@@ -669,6 +669,38 @@ delimiter ;
 
 
 delimiter ##
+create procedure sp_insere_petshop (nome varchar(100), cnpj varchar (14),estado varchar(45),cidade varchar(100), bairro varchar(100), rua varchar(100), num int, telefone varchar(100), email varchar(100))
+begin
+	if (email like '%@%') then
+     insert into petshop (ptsnome,ptscnpj,ptsestado,ptscidade,ptsbairro,ptsrua,ptsnumero,ptstelefone,ptsemail) values
+     (nome,cnpj, estado, cidade, bairro, rua, num, telefone, email);
+    else
+      select "E-mail inválido";
+    end if;
+end##
+delimiter ;
+
+
+delimiter ##
+create procedure sp_alterapetshop(nome varchar(70), cnpj varchar(20), estado varchar(45), cidade varchar(70), bairro varchar(70), rua varchar(70), email varchar(70), numero int, telefone varchar(12), cod int)
+begin
+
+	update petshop
+	set ptsnome=nome,
+    ptscnpj = cnpj,
+	ptscidade=cidade,
+	ptsbairro=bairro,
+	ptsrua=rua,
+	ptsemail=email,
+	ptsnumero=numero,
+	ptstelefone=telefone,
+	ptsestado=estado
+	where cod=ptsid;
+
+end##
+delimiter ;
+
+delimiter ##
 create procedure sp_exclui_petshop(cod int)
 begin
 
@@ -681,6 +713,16 @@ end if;
 
 end##
 delimiter ;
+
+
+select * from auth_user_user_permissions;
+show create table auth_permission;
+
+Alter table ong
+add ongestado varchar (45) not null;
+
+Alter table petshop
+add ptsestado varchar (45) not null;
 
 
 delimiter ##
@@ -741,7 +783,6 @@ begin
 delete from venda
 where venpetshop_ptsid = old.ptsid;
 
-
 delete from servico
 where petshop_ptsid = old.ptsid;
 
@@ -750,3 +791,10 @@ where propetshop_ptsid = old.ptsid;
 
 end##
 delimiter ;
+
+
+
+-- pessoa x
+-- petshop x
+-- ong x
+-- pet x
