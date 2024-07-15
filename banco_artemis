@@ -43,8 +43,7 @@ CREATE TABLE IF NOT EXISTS `artemis`.`pessoa` (
   UNIQUE INDEX `pescpf_UNIQUE` (`pescpf` ASC) VISIBLE)
 ENGINE = InnoDB;
 
-alter table pessoa
-drop column estado ;
+
 
 
 -- -----------------------------------------------------
