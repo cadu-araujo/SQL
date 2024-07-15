@@ -927,3 +927,7 @@ delimiter ;
 -- pet x
 -- produto x
 -- serviço x
+
+insert into auth_group (name) values ("Pessoa");
+insert into auth_group (name) values ("Ong");
+insert into auth_group (name) values ("Pet shop");
