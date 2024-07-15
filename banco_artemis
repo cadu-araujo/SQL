@@ -715,6 +715,109 @@ end##
 delimiter ;
 
 
+delimiter ##
+create procedure sp_insere_produto (nome varchar(100), preco float, saldo int, petshop int, validade date)
+begin
+
+	if (petshop in (select ptsid from petshop)) then
+    
+     insert into produto (pronome, propreco,prosaldo,propetshop_ptsid,prodtvalidade) values
+     (nome,preco, saldo, petshop, validade);
+     
+    else
+      select "Petshop não existe";
+    end if;
+end##
+delimiter ;
+
+
+delimiter ##
+create procedure sp_alteraproduto(nome varchar(100), preco float, saldo int, petshop int, validade date, cod int)
+begin
+
+	update produto
+	set ptsnome=nome,
+    propreco = preco,
+    prosaldo = saldo,
+    propetshop_ptsid = petshop,
+    prodtvalidade = validade
+	where cod=proid;
+
+end##
+delimiter ;
+
+delimiter ##
+create procedure sp_exclui_produto(cod int)
+begin
+
+if (cod in (select proid from produto)) then
+	delete from produto
+	where proid = cod;
+else
+	select "Produto não existe";
+end if;
+
+end##
+delimiter ;
+
+
+delimiter ##
+create procedure sp_insere_servico ( preco float,  agendado datetime, pet int, pessoa int, petshop int, tipo int)
+begin
+
+	if (tipo in (select tpsid from tiposervico )) then
+		if (pet in (select spetid from pet)) then
+			if (pessoa in (select pesid from pessoa)) then
+				if (petshop in (select ptsid from petshop)) then
+    
+					insert into servico (servalor,tosdatahora,pet_petid,pessoa_pesid,petshop_ptsid,tiposervico_tpsid) values
+					(preco, agendado, pet, pessoa, petshop, tipo);
+				else
+					select "Petshop não existe";
+				end if;
+			else 
+				select "Pessoa não existe";
+			end if;
+		else 
+			select "Pet não existe";
+		end if;
+	else 
+			select "Tipo de serviço não cadastrado";
+		end if;
+end##
+delimiter ;
+
+delimiter ##
+create procedure sp_alteraservico(preco float,  agendado datetime, pet int, pessoa int, petshop int, tipo int, cod int)
+begin
+
+	update servico
+	set servalor=preco,
+    tosdatahora = agendado,
+    pet_petid = pet,
+    pessoa_pesid = pessoa,
+    petshop_ptsid = petshop,
+    tiposervico_tpsid = tipo
+	where cod=proid;
+
+end##
+delimiter ;
+
+
+delimiter ##
+create procedure sp_exclui_servico(cod int)
+begin
+
+if (cod in (select serid from servico)) then
+	delete from servico
+	where serid = cod;
+else
+	select "Serviço não existe";
+end if;
+
+end##
+delimiter ;
+
 select * from auth_user_user_permissions;
 show create table auth_permission;
 
@@ -793,8 +896,34 @@ end##
 delimiter ;
 
 
+delimiter ##
+create trigger tg_exclui_produto
+before delete on produto
+for each row
+begin
+
+delete from venda
+where produto_proid = old.proid;
+
+end##
+delimiter ;
+
+delimiter ##
+create trigger tg_exclui_servico
+before delete on servico
+for each row
+begin
+
+delete from venda
+where servico_serid=old.serid;
+
+end##
+delimiter ;
+
 
 -- pessoa x
 -- petshop x
 -- ong x
 -- pet x
+-- produto x
+-- serviço x
