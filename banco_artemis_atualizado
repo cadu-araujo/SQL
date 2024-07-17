@@ -177,21 +177,15 @@ DEFAULT CHARACTER SET = utf8mb3;
 CREATE TABLE IF NOT EXISTS `artemis`.`servico` (
   `serid` INT NOT NULL AUTO_INCREMENT,
   `servalor` FLOAT NOT NULL,
-  `pet_petid` INT NOT NULL,
   `petshop_ptsid` INT NOT NULL,
   `tiposervico_tpsid` INT NOT NULL,
   `serdescricao` VARCHAR(200) NULL,
   PRIMARY KEY (`serid`),
-  INDEX `fk_tosa_pet1_idx` (`pet_petid` ASC) VISIBLE,
   INDEX `fk_tosa_petshop1_idx` (`petshop_ptsid` ASC) VISIBLE,
   INDEX `fk_servico_tiposervico1_idx` (`tiposervico_tpsid` ASC) VISIBLE,
   CONSTRAINT `fk_servico_tiposervico1`
     FOREIGN KEY (`tiposervico_tpsid`)
     REFERENCES `artemis`.`tiposervico` (`tpsid`),
-  CONSTRAINT `fk_tosa_pet1`
-    FOREIGN KEY (`pet_petid`)
-    REFERENCES `artemis`.`pet` (`petid`),
-  CONSTRAINT `fk_tosa_petshop1`
     FOREIGN KEY (`petshop_ptsid`)
     REFERENCES `artemis`.`petshop` (`ptsid`))
 ENGINE = InnoDB
@@ -791,28 +785,21 @@ DELIMITER ;
 
 DELIMITER $$
 USE `artemis`$$
-CREATE DEFINER=`root`@`localhost` PROCEDURE `sp_insere_servico`( preco float,  agendado datetime, pet int, pessoa int, petshop int, tipo int)
+CREATE DEFINER=`root`@`localhost` PROCEDURE `sp_insere_servico`( preco float, petshop int, tipo int, descricao varchar(200))
 begin
 
 	if (tipo in (select tpsid from tiposervico )) then
-		if (pet in (select spetid from pet)) then
-			if (pessoa in (select pesid from pessoa)) then
 				if (petshop in (select ptsid from petshop)) then
-    
-					insert into servico (servalor,tosdatahora,pet_petid,pessoa_pesid,petshop_ptsid,tiposervico_tpsid) values
-					(preco, agendado, pet, pessoa, petshop, tipo);
+                
+					insert into servico (servalor,petshop_ptsid,tiposervico_tpsid,serdescricao) values
+					(preco, petshop, tipo, descricao);
+				
 				else
 					select "Petshop não existe";
 				end if;
-			else 
-				select "Pessoa não existe";
-			end if;
-		else 
-			select "Pet não existe";
-		end if;
 	else 
 			select "Tipo de serviço não cadastrado";
-		end if;
+	end if;
 end$$
 
 DELIMITER ;
@@ -966,9 +953,3 @@ DELIMITER ;
 SET SQL_MODE=@OLD_SQL_MODE;
 SET FOREIGN_KEY_CHECKS=@OLD_FOREIGN_KEY_CHECKS;
 SET UNIQUE_CHECKS=@OLD_UNIQUE_CHECKS;
-
-
-insert into auth_group (name) values ("Pessoa");
-insert into auth_group (name) values ("Ong");
-insert into auth_group (name) values ("Pet shop");
-
