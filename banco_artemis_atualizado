@@ -440,15 +440,20 @@ CREATE TABLE IF NOT EXISTS `artemis`.`servico_foto` (
     ON UPDATE NO ACTION)
 ENGINE = InnoDB;
 
+
+
+
 USE `artemis` ;
 
 -- -----------------------------------------------------
 -- procedure sp_alteraong
 -- -----------------------------------------------------
 
+
+
+
 DELIMITER $$
-USE `artemis`$$
-CREATE DEFINER=`root`@`localhost` PROCEDURE `sp_alteraong`(nome varchar(70), estado varchar(45), cidade varchar(70), bairro varchar(70), rua varchar(70), email varchar(70), numero int, telefone varchar(12), cod int)
+CREATE PROCEDURE `sp_alteraong`(nome varchar(70), estado varchar(45), cidade varchar(70), bairro varchar(70), rua varchar(70), email varchar(70), numero int, telefone varchar(12), cod int)
 begin
 
 	update ong 
@@ -463,7 +468,6 @@ begin
 	where cod=ongid;
 
 end$$
-
 DELIMITER ;
 
 -- -----------------------------------------------------
@@ -471,8 +475,7 @@ DELIMITER ;
 -- -----------------------------------------------------
 
 DELIMITER $$
-USE `artemis`$$
-CREATE DEFINER=`root`@`localhost` PROCEDURE `sp_alterapessoa`(cpf varchar(12), dtnascto date, sexo char(1), cidade varchar(70), bairro varchar(70), rua varchar(70), email varchar(70), numero int, telefone varchar(12), nome varchar(70), estado varchar(70), cod int)
+CREATE PROCEDURE `sp_alterapessoa`(cpf varchar(12), dtnascto date, sexo char(1), cidade varchar(70), bairro varchar(70), rua varchar(70), email varchar(70), numero int, telefone varchar(12), nome varchar(70), estado varchar(70), cod int)
 begin
 
 	update pessoa 
@@ -490,7 +493,6 @@ begin
 	where cod=pesid;
 
 end$$
-
 DELIMITER ;
 
 -- -----------------------------------------------------
@@ -498,8 +500,7 @@ DELIMITER ;
 -- -----------------------------------------------------
 
 DELIMITER $$
-USE `artemis`$$
-CREATE DEFINER=`root`@`localhost` PROCEDURE `sp_alterapet`(nome varchar(65), sexo char(1), castrado enum('castrado','não castrado','não sei'), dtnascto date, peso float, pessoa int, porte int, raca int, tipo int, cod int)
+CREATE PROCEDURE `sp_alterapet`(nome varchar(65), sexo char(1), castrado enum('castrado','não castrado','não sei'), dtnascto date, peso float, pessoa int, porte int, raca int, tipo int, cod int)
 begin
 if(pessoa in (select pesid from pessoa) or pessoa = 0) then
 	if(porte in (select ptpid from pet_porte)) then
@@ -530,7 +531,6 @@ else
 end if;
 
 end$$
-
 DELIMITER ;
 
 -- -----------------------------------------------------
@@ -538,8 +538,7 @@ DELIMITER ;
 -- -----------------------------------------------------
 
 DELIMITER $$
-USE `artemis`$$
-CREATE DEFINER=`root`@`localhost` PROCEDURE `sp_alterapetshop`(nome varchar(70), cnpj varchar(20), estado varchar(45), cidade varchar(70), bairro varchar(70), rua varchar(70), email varchar(70), numero int, telefone varchar(12), cod int)
+CREATE PROCEDURE `sp_alterapetshop`(nome varchar(70), cnpj varchar(20), estado varchar(45), cidade varchar(70), bairro varchar(70), rua varchar(70), email varchar(70), numero int, telefone varchar(12), cod int)
 begin
 
 	update petshop
@@ -555,7 +554,6 @@ begin
 	where cod=ptsid;
 
 end$$
-
 DELIMITER ;
 
 -- -----------------------------------------------------
@@ -563,8 +561,7 @@ DELIMITER ;
 -- -----------------------------------------------------
 
 DELIMITER $$
-USE `artemis`$$
-CREATE DEFINER=`root`@`localhost` PROCEDURE `sp_alteraproduto`(nome varchar(100), preco float, saldo int, petshop int, validade date, cod int)
+CREATE PROCEDURE `sp_alteraproduto`(nome varchar(100), preco float, saldo int, petshop int, validade date, cod int)
 begin
 
 	update produto
@@ -576,7 +573,6 @@ begin
 	where cod=proid;
 
 end$$
-
 DELIMITER ;
 
 -- -----------------------------------------------------
@@ -584,21 +580,17 @@ DELIMITER ;
 -- -----------------------------------------------------
 
 DELIMITER $$
-USE `artemis`$$
-CREATE DEFINER=`root`@`localhost` PROCEDURE `sp_alteraservico`(preco float,  agendado datetime, pet int, pessoa int, petshop int, tipo int, cod int)
+CREATE PROCEDURE `sp_alteraservico`(preco float, petshop int, tipo int, decsricao varchar (200), cod int)
 begin
 
 	update servico
 	set servalor=preco,
-    tosdatahora = agendado,
-    pet_petid = pet,
-    pessoa_pesid = pessoa,
     petshop_ptsid = petshop,
-    tiposervico_tpsid = tipo
+    tiposervico_tpsid = tipo,
+    serdescricao = descricao
 	where cod=proid;
 
 end$$
-
 DELIMITER ;
 
 -- -----------------------------------------------------
@@ -606,8 +598,7 @@ DELIMITER ;
 -- -----------------------------------------------------
 
 DELIMITER $$
-USE `artemis`$$
-CREATE DEFINER=`root`@`localhost` PROCEDURE `sp_exclui_petshop`(cod int)
+CREATE PROCEDURE `sp_exclui_petshop`(cod int)
 begin
 
 if (cod in (select ptsid from petshop)) then
@@ -618,7 +609,6 @@ else
 end if;
 
 end$$
-
 DELIMITER ;
 
 -- -----------------------------------------------------
@@ -626,8 +616,7 @@ DELIMITER ;
 -- -----------------------------------------------------
 
 DELIMITER $$
-USE `artemis`$$
-CREATE DEFINER=`root`@`localhost` PROCEDURE `sp_exclui_produto`(cod int)
+CREATE PROCEDURE `sp_exclui_produto`(cod int)
 begin
 
 if (cod in (select proid from produto)) then
@@ -638,7 +627,6 @@ else
 end if;
 
 end$$
-
 DELIMITER ;
 
 -- -----------------------------------------------------
@@ -646,8 +634,7 @@ DELIMITER ;
 -- -----------------------------------------------------
 
 DELIMITER $$
-USE `artemis`$$
-CREATE DEFINER=`root`@`localhost` PROCEDURE `sp_exclui_servico`(cod int)
+CREATE  PROCEDURE `sp_exclui_servico`(cod int)
 begin
 
 if (cod in (select serid from servico)) then
@@ -666,8 +653,7 @@ DELIMITER ;
 -- -----------------------------------------------------
 
 DELIMITER $$
-USE `artemis`$$
-CREATE DEFINER=`root`@`localhost` PROCEDURE `sp_excluiong`(cod int)
+CREATE PROCEDURE `sp_excluiong`(cod int)
 begin
 
 if (cod in (select ongid from ong)) then
@@ -678,7 +664,6 @@ else
 end if;
 
 end$$
-
 DELIMITER ;
 
 -- -----------------------------------------------------
@@ -686,8 +671,7 @@ DELIMITER ;
 -- -----------------------------------------------------
 
 DELIMITER $$
-USE `artemis`$$
-CREATE DEFINER=`root`@`localhost` PROCEDURE `sp_excluipessoa`(cod int)
+CREATE PROCEDURE `sp_excluipessoa`(cod int)
 begin
 
 if (cod in (select pesid from pessoa)) then
@@ -698,7 +682,6 @@ else
 end if;
 
 end$$
-
 DELIMITER ;
 
 -- -----------------------------------------------------
@@ -706,8 +689,7 @@ DELIMITER ;
 -- -----------------------------------------------------
 
 DELIMITER $$
-USE `artemis`$$
-CREATE DEFINER=`root`@`localhost` PROCEDURE `sp_excluipet`(cod int)
+CREATE PROCEDURE `sp_excluipet`(cod int)
 begin
 
 if (cod in (select petid from pet)) then
@@ -718,7 +700,6 @@ else
 end if;
 
 end$$
-
 DELIMITER ;
 
 -- -----------------------------------------------------
@@ -726,8 +707,7 @@ DELIMITER ;
 -- -----------------------------------------------------
 
 DELIMITER $$
-USE `artemis`$$
-CREATE DEFINER=`root`@`localhost` PROCEDURE `sp_insere_ong`(nome varchar(100), estado varchar(45), cidade varchar(100), bairro varchar(100), rua varchar(100), num int, telefone varchar(100), email varchar(100))
+CREATE PROCEDURE `sp_insere_ong`(nome varchar(100), estado varchar(45), cidade varchar(100), bairro varchar(100), rua varchar(100), num int, telefone varchar(100), email varchar(100))
 begin
 	if (email like '%@%') then
      insert into ong (ongnome,ongestado, ongcidade,ongbairro,ongrua,ongnum,ongtelefone,ongemail) values
@@ -737,7 +717,6 @@ begin
     end if;
     
 end$$
-
 DELIMITER ;
 
 -- -----------------------------------------------------
@@ -745,8 +724,7 @@ DELIMITER ;
 -- -----------------------------------------------------
 
 DELIMITER $$
-USE `artemis`$$
-CREATE DEFINER=`root`@`localhost` PROCEDURE `sp_insere_petshop`(nome varchar(100), cnpj varchar (14),estado varchar(45),cidade varchar(100), bairro varchar(100), rua varchar(100), num int, telefone varchar(100), email varchar(100))
+CREATE PROCEDURE `sp_insere_petshop`(nome varchar(100), cnpj varchar (14),estado varchar(45),cidade varchar(100), bairro varchar(100), rua varchar(100), num int, telefone varchar(100), email varchar(100))
 begin
 	if (email like '%@%') then
      insert into petshop (ptsnome,ptscnpj,ptsestado,ptscidade,ptsbairro,ptsrua,ptsnumero,ptstelefone,ptsemail) values
@@ -755,7 +733,6 @@ begin
       select "E-mail inválido";
     end if;
 end$$
-
 DELIMITER ;
 
 -- -----------------------------------------------------
@@ -763,8 +740,7 @@ DELIMITER ;
 -- -----------------------------------------------------
 
 DELIMITER $$
-USE `artemis`$$
-CREATE DEFINER=`root`@`localhost` PROCEDURE `sp_insere_produto`(nome varchar(100), preco float, saldo int, petshop int, validade date)
+CREATE PROCEDURE `sp_insere_produto`(nome varchar(100), preco float, saldo int, petshop int, validade date)
 begin
 
 	if (petshop in (select ptsid from petshop)) then
@@ -776,7 +752,6 @@ begin
       select "Petshop não existe";
     end if;
 end$$
-
 DELIMITER ;
 
 -- -----------------------------------------------------
@@ -784,8 +759,7 @@ DELIMITER ;
 -- -----------------------------------------------------
 
 DELIMITER $$
-USE `artemis`$$
-CREATE DEFINER=`root`@`localhost` PROCEDURE `sp_insere_servico`( preco float, petshop int, tipo int, descricao varchar(200))
+CREATE PROCEDURE `sp_insere_servico`( preco float, petshop int, tipo int, descricao varchar(200))
 begin
 
 	if (tipo in (select tpsid from tiposervico )) then
@@ -801,7 +775,6 @@ begin
 			select "Tipo de serviço não cadastrado";
 	end if;
 end$$
-
 DELIMITER ;
 
 -- -----------------------------------------------------
@@ -809,15 +782,13 @@ DELIMITER ;
 -- -----------------------------------------------------
 
 DELIMITER $$
-USE `artemis`$$
-CREATE DEFINER=`root`@`localhost` PROCEDURE `sp_inserepessoa`(cpf varchar(12), dtnascto date, sexo char(1),  cidade varchar(70), bairro varchar(70), rua varchar(70), email varchar(70), numero int, telefone varchar(12), nome varchar(70), estado varchar(70))
+CREATE PROCEDURE `sp_inserepessoa`(cpf varchar(12), dtnascto date, sexo char(1),  cidade varchar(70), bairro varchar(70), rua varchar(70), email varchar(70), numero int, telefone varchar(12), nome varchar(70), estado varchar(70))
 begin
 
 insert into pessoa (pescpf,pesdtnascto,pessexo,pescidade,pesbairro,pesrua,pesemail,pesnumero,pestelefone,pesnome,pesestado)
 values (cpf, dtnascto, sexo, cidade, bairro, rua, email, numero, telefone, nome, estado);
 
 end$$
-
 DELIMITER ;
 
 -- -----------------------------------------------------
@@ -825,8 +796,7 @@ DELIMITER ;
 -- -----------------------------------------------------
 
 DELIMITER $$
-USE `artemis`$$
-CREATE DEFINER=`root`@`localhost` PROCEDURE `sp_inserepet`(nome varchar(65), sexo char(1), castrado enum('castrado','não castrado','não sei'), dtnascto date, peso float, pessoa int, porte int, raca int, tipo int)
+CREATE PROCEDURE `sp_inserepet`(nome varchar(65), sexo char(1), castrado enum('castrado','não castrado','não sei'), dtnascto date, peso float, pessoa int, porte int, raca int, tipo int)
 begin
 if(pessoa in (select pesid from pessoa)or pessoa=0) then
 	if(porte in (select ptpid from pet_porte)) then
@@ -848,37 +818,29 @@ else
 end if;
 
 end$$
-
 DELIMITER ;
-USE `artemis`;
+
 
 DELIMITER $$
-USE `artemis`$$
-CREATE
-DEFINER=`root`@`localhost`
-TRIGGER `artemis`.`tg_exclui_pessoa`
+CREATE TRIGGER `artemis`.`tg_exclui_pessoa`
 BEFORE DELETE ON `artemis`.`pessoa`
 FOR EACH ROW
 begin
 
-
 delete from venda
 where venpessoa_pesid = old.pesid;
-
 
 delete from servico
 where pessoa_pesid = old.pesid;
 
 end$$
+DELIMITER ;
 
-USE `artemis`$$
-CREATE
-DEFINER=`root`@`localhost`
-TRIGGER `artemis`.`tg_exclui_petshop`
+delimiter ##
+CREATE TRIGGER `artemis`.`tg_exclui_petshop`
 BEFORE DELETE ON `artemis`.`petshop`
 FOR EACH ROW
 begin
-
 
 delete from venda
 where venpetshop_ptsid = old.ptsid;
@@ -890,11 +852,10 @@ delete from produto
 where propetshop_ptsid = old.ptsid;
 
 end$$
+DELIMITER ;
 
-USE `artemis`$$
-CREATE
-DEFINER=`root`@`localhost`
-TRIGGER `artemis`.`tg_exclui_produto`
+delimiter ##
+CREATE TRIGGER `artemis`.`tg_exclui_produto`
 BEFORE DELETE ON `artemis`.`produto`
 FOR EACH ROW
 begin
@@ -903,11 +864,10 @@ delete from venda
 where produto_proid = old.proid;
 
 end$$
+DELIMITER ;
 
-USE `artemis`$$
-CREATE
-DEFINER=`root`@`localhost`
-TRIGGER `artemis`.`tg_exclui_pet`
+delimiter ##
+CREATE TRIGGER `artemis`.`tg_exclui_pet`
 BEFORE DELETE ON `artemis`.`pet`
 FOR EACH ROW
 begin
@@ -919,11 +879,11 @@ delete from pet_adocao
 where pet_petid = old.petid;
 
 end$$
+DELIMITER ;
 
+delimiter ##
 USE `artemis`$$
-CREATE
-DEFINER=`root`@`localhost`
-TRIGGER `artemis`.`tg_exclui_servico`
+CREATE TRIGGER `artemis`.`tg_exclui_servico`
 BEFORE DELETE ON `artemis`.`servico`
 FOR EACH ROW
 begin
@@ -932,24 +892,81 @@ delete from venda
 where servico_serid=old.serid;
 
 end$$
+delimiter ;
 
+delimiter ##
 USE `artemis`$$
-CREATE
-DEFINER=`root`@`localhost`
-TRIGGER `artemis`.`tg_exclui_ong`
+CREATE TRIGGER `artemis`.`tg_exclui_ong`
 BEFORE DELETE ON `artemis`.`ong`
 FOR EACH ROW
 begin
-
 
 delete from pet_adocao
 where ong_ongid = old.ongid;
 
 end$$
-
-
 DELIMITER ;
 
-SET SQL_MODE=@OLD_SQL_MODE;
-SET FOREIGN_KEY_CHECKS=@OLD_FOREIGN_KEY_CHECKS;
-SET UNIQUE_CHECKS=@OLD_UNIQUE_CHECKS;
+
+DELIMITER $$
+CREATE procedure sp_insere_solicita (pessoa int, servico int, agendamento datetime, pet int)
+begin
+	if(pessoa in (select pesid from pessoa)) then
+		if(servico in (select serid from servico )) then
+			if(pet in (select petid from pet)) then
+				
+                insert into solicita (pessoa_pesid,servico_serid,soldthr,solpetid) values
+                (pessoa, servico, agendamento, pet);
+                
+			else
+				select "Pessoa não existe";
+			end if;
+		else
+			select "Serviço não cadastrado";
+		end if;
+	else
+		select "Pet não cadastrado";
+	end if;
+ end$$
+DELIMITER ;
+
+
+DELIMITER $$
+CREATE procedure sp_altera_solicita (pessoa int, servico int, agendamento datetime, pet int, cod int)
+begin
+	if(pessoa in (select pesid from pessoa)) then
+		if(servico in (select serid from servico )) then
+			if(pet in (select petid from pet)) then
+				
+					update solicita
+					set 
+					pessoa_pesid = pessoa,
+                    servico_serid = servico,
+                    soldthr = agendamento,
+                    solpetid = pet
+					where cod=solid;
+			else
+				select "Pessoa não existe";
+			end if;
+		else
+			select "Serviço não cadastrado";
+		end if;
+	else
+		select "Pet não cadastrado";
+	end if;
+ end$$
+DELIMITER ;
+
+
+DELIMITER $$
+CREATE procedure sp_exclui_solicita (cod int)
+begin
+	if (cod in (select solid from solicita)) then
+    
+		delete from solicita
+        where solid = cod;
+	else
+		select "Solicitação não realizada";
+	end if;
+ end$$
+DELIMITER ;
