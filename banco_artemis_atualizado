@@ -234,7 +234,7 @@ DEFAULT CHARACTER SET = utf8mb3;
 -- Table `artemis`.`venda`
 -- -----------------------------------------------------
 CREATE TABLE IF NOT EXISTS `artemis`.`venda` (
-  `venid` INT NOT NULL AUTO_INCREMENT,
+  `venid` INT NOT NULL ,
   `venformapagamento_fpgid` INT NOT NULL,
   `venpessoa_pesid` INT NOT NULL,
   `venpetshop_ptsid` INT NOT NULL,
@@ -996,3 +996,16 @@ begin
 	end if;
  end$$
 DELIMITER ;
+
+
+delimiter ##
+create procedure sp_insere_carrinho ()
+begin
+
+end ##
+delimiter ;
+
+
+
+-- testes 
+pessoa
