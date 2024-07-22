@@ -441,7 +441,33 @@ CREATE TABLE IF NOT EXISTS `artemis`.`servico_foto` (
 ENGINE = InnoDB;
 
 
-
+CREATE TABLE IF NOT EXISTS `artemis`.`carrinho` (
+  `carid` INT NOT NULL AUTO_INCREMENT,
+  `carpro` INT NULL,
+  `carpes` INT NOT NULL,
+  `carser` INT NULL,
+  `carquant` INT NOT NULL,
+  `carpreco` FLOAT NOT NULL,
+  PRIMARY KEY (`carid`),
+  INDEX `fk_carrinho_produto1_idx` (`carpro` ASC) VISIBLE,
+  INDEX `fk_carrinho_pessoa1_idx` (`carpes` ASC) VISIBLE,
+  INDEX `fk_carrinho_servico1_idx` (`carser` ASC) VISIBLE,
+  CONSTRAINT `fk_carrinho_produto1`
+    FOREIGN KEY (`carpro`)
+    REFERENCES `artemis`.`produto` (`proid`)
+    ON DELETE NO ACTION
+    ON UPDATE NO ACTION,
+  CONSTRAINT `fk_carrinho_pessoa1`
+    FOREIGN KEY (`carpes`)
+    REFERENCES `artemis`.`pessoa` (`pesid`)
+    ON DELETE NO ACTION
+    ON UPDATE NO ACTION,
+  CONSTRAINT `fk_carrinho_servico1`
+    FOREIGN KEY (`carser`)
+    REFERENCES `artemis`.`servico` (`serid`)
+    ON DELETE NO ACTION
+    ON UPDATE NO ACTION)
+ENGINE = InnoDB;
 
 USE `artemis` ;
 
