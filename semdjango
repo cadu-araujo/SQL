@@ -882,6 +882,10 @@ end if;
 end$$
 delimiter ;
 
+create view visualiza_categoria as
+select distinct(ctpnome) as "Categoria" from categoria_produto
+group by ctpid,ctpnome;
+
 delimiter $$
 CREATE TRIGGER `artemis`.`tg_exclui_produto`
 BEFORE DELETE ON `artemis`.`produto`
@@ -1344,9 +1348,3 @@ INSERT INTO `artemis`.`pet_raca` (`ptrnome`, `pet_tipo_pttid`) VALUES ('Siamês'
 
 select carpes, sum(carpreco) as "Valor total" from carrinho
 group by carpes;
-
-
-
-select * from visualiza_cidades;
-
-call sp_busca_cidade ("Manaus");
