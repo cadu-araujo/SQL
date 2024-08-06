@@ -612,6 +612,23 @@ where propetshop_ptsid = old.ptsid;
 end$$
 DELIMITER ;
 
+create view visualiza_cidades as
+select distinct(ptscidade) as "Cidades" from petshop
+group by ptsid, ptscidade;
+
+delimiter $$
+create procedure sp_busca_cidade (cidade varchar (100))
+begin
+	if (cidade in (select * from visualiza_cidades)) then
+		select concat("Cidade: ",ptscidade,"; Bairro: ",ptsbairro, "; Rua: ",ptsrua,"; Número: ", ptsnumero) as "Endereço" from petshop
+		where upper(ptscidade) = upper(cidade)
+        group by ptsid, ptscidade;
+    else 
+		select "Cidade não cadastradas por petshops";
+    end if;
+end $$
+delimiter ;
+
 /* pessoa */
 
 DELIMITER $$
@@ -849,6 +866,21 @@ select "Petshop não existe";
 end if;
 end $$
 DELIMITER ;
+
+
+delimiter $$
+create procedure sp_altera_quantidade (produto int, quantidade int)
+begin
+if (produto in (select proid from produto)) then
+	update produto
+    set prosaldo = quantidade
+    where proid = produto;
+else
+ select "Produto não cadastrado";
+end if;
+
+end$$
+delimiter ;
 
 delimiter $$
 CREATE TRIGGER `artemis`.`tg_exclui_produto`
@@ -1313,3 +1345,8 @@ INSERT INTO `artemis`.`pet_raca` (`ptrnome`, `pet_tipo_pttid`) VALUES ('Siamês'
 select carpes, sum(carpreco) as "Valor total" from carrinho
 group by carpes;
 
+
+
+select * from visualiza_cidades;
+
+call sp_busca_cidade ("Manaus");
