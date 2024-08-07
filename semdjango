@@ -144,6 +144,7 @@ CREATE TABLE IF NOT EXISTS `artemis`.`avaliacao` (
   `avavalor` INT NOT NULL,
   `pessoa_pesid` INT NOT NULL,
   `avacod` INT NOT NULL AUTO_INCREMENT,
+  `avadthora` DATETIME NULL DEFAULT current_timestamp,
   PRIMARY KEY (`avacod`),
   INDEX `fk_avaliacao_servico1_idx` (`servico_serid` ASC) VISIBLE,
   INDEX `fk_avaliacao_pessoa1_idx` (`pessoa_pesid` ASC) VISIBLE,
@@ -210,6 +211,7 @@ CREATE TABLE IF NOT EXISTS `artemis`.`venda` (
   `venformapagamento_fpgid` INT NOT NULL,
   `venpessoa_pesid` INT NOT NULL,
   `venvalor` FLOAT NOT NULL,
+  `vendthora` DATETIME NULL DEFAULT current_timestamp,
   PRIMARY KEY (`venid`),
   INDEX `fk_venda_formapagamento1_idx` (`venformapagamento_fpgid` ASC) VISIBLE,
   INDEX `fk_venda_pessoa1_idx` (`venpessoa_pesid` ASC) VISIBLE,
@@ -484,6 +486,26 @@ CREATE TABLE IF NOT EXISTS `artemis`.`solicita` (
 ENGINE = InnoDB
 DEFAULT CHARACTER SET = utf8mb3;
 
+
+-- -----------------------------------------------------
+-- Table `artemis`.`tentativa_adota`
+-- -----------------------------------------------------
+CREATE TABLE IF NOT EXISTS `artemis`.`tentativa_adota` (
+  `ttaid` INT NOT NULL AUTO_INCREMENT,
+  `ttapes` INT NOT NULL,
+  `tta_petadocao` INT NOT NULL,
+  `ttastatus` ENUM("Requisitado", "Aceito", "Negado", "Adotado", "Não Adotado") NOT NULL,
+  PRIMARY KEY (`ttaid`),
+  INDEX `ttapes` (`ttapes` ASC) VISIBLE,
+  INDEX `tta_petadocao` (`tta_petadocao` ASC) VISIBLE,
+  CONSTRAINT `tentativa_adota_ibfk_1`
+    FOREIGN KEY (`ttapes`)
+    REFERENCES `artemis`.`pessoa` (`pesid`),
+  CONSTRAINT `tentativa_adota_ibfk_2`
+    FOREIGN KEY (`tta_petadocao`)
+    REFERENCES `artemis`.`pet_adocao` (`adoid`))
+ENGINE = InnoDB
+DEFAULT CHARACTER SET = utf8mb3;
 
 /* ong */
 
@@ -881,10 +903,6 @@ end if;
 
 end$$
 delimiter ;
-
-create view visualiza_categoria as
-select distinct(ctpnome) as "Categoria" from categoria_produto
-group by ctpid,ctpnome;
 
 delimiter $$
 CREATE TRIGGER `artemis`.`tg_exclui_produto`
@@ -1305,6 +1323,70 @@ end if;
 end$$
 delimiter ;
 
+/* adoção */
+delimiter $$
+create procedure sp_insere_pet_adocao (ong int, pet int)
+begin
+if (ong in (select ongid from ong)) then
+	if (pet in (select petid from pet) and (pet not in(select pet_petid from pet_petid))) then
+		
+        insert into pet_adocao (ong_ongid,pet_petid) values
+        (ong, pet);
+    else
+		select "Pet inválido";
+    end if;
+else
+	select "Ong inválida";
+end if;
+
+end $$
+delimiter ;
+
+delimiter $$
+create procedure sp_exclui_pet_adocao (cod int)
+begin
+	if (cod in (select pet_petid from pet_petid)) then
+		
+        delete from pet_adocao
+        where adoid = cod;
+    else
+		select "Adoção nã cadastrada";
+    end if;
+end $$
+delimiter ;
+
+delimiter $$
+create procedure sp_inicia_adocao (pessoa int, adocao int)
+begin
+if (pessoa in (select pesid from pessoa)) then
+	if(adocao in (select adoid from pet_adocao)) then
+		insert into tentativa_adota (ttapes, tta_petadocao,ttastatus) values
+        (pessoa, adocao, "Requisitado");
+    else 
+		select "Cadastro de adoção não realizado";
+    end if;
+else
+	select "Pessoa não existe";
+end if;
+end $$
+delimiter ;
+
+delimiter $$
+create procedure sp_altera_status_adocao (cod int, novo varchar(15))
+begin
+if (cod in (select ttaid from tentativa_adota)) then
+	if(upper(novo) in ("REQUISITADO","ACEITO","NEGADO","ADOTADO","NÃO ADOTADO")) then
+		update tentativa_adota
+        set ttastatus = novo;
+    else
+		select "Valor inválido";
+    end if;
+else
+	select "Tentativa de adoção não realizada";
+end if;
+end $$
+delimiter ;
+
 /* inserts subclasses*/
 
 select * from formapagamento;
@@ -1345,6 +1427,11 @@ INSERT INTO `artemis`.`pet_raca` (`ptrnome`, `pet_tipo_pttid`) VALUES ('Pastor A
 INSERT INTO `artemis`.`pet_raca` (`ptrnome`, `pet_tipo_pttid`) VALUES ('Rex', '3');
 INSERT INTO `artemis`.`pet_raca` (`ptrnome`, `pet_tipo_pttid`) VALUES ('Siamês', '2');
 
-
 select carpes, sum(carpreco) as "Valor total" from carrinho
 group by carpes;
+
+select * from petshop;
+select * from pessoa;
+select * from produto;
+select * from carrinho;
+select * from venda;
