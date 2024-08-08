@@ -211,7 +211,8 @@ CREATE TABLE IF NOT EXISTS `artemis`.`venda` (
   `venformapagamento_fpgid` INT NOT NULL,
   `venpessoa_pesid` INT NOT NULL,
   `venvalor` FLOAT NOT NULL,
-  `vendthora` DATETIME NULL DEFAULT current_timestamp,
+  `vendthora` DATETIME NULL DEFAULT CURRENT_TIMESTAMP,
+  `venqtd` INT NOT NULL,
   PRIMARY KEY (`venid`),
   INDEX `fk_venda_formapagamento1_idx` (`venformapagamento_fpgid` ASC) VISIBLE,
   INDEX `fk_venda_pessoa1_idx` (`venpessoa_pesid` ASC) VISIBLE,
@@ -221,31 +222,6 @@ CREATE TABLE IF NOT EXISTS `artemis`.`venda` (
   CONSTRAINT `fk_venda_pessoa1`
     FOREIGN KEY (`venpessoa_pesid`)
     REFERENCES `artemis`.`pessoa` (`pesid`))
-ENGINE = InnoDB
-DEFAULT CHARACTER SET = utf8mb3;
-
-
--- -----------------------------------------------------
--- Table `artemis`.`itemvenda`
--- -----------------------------------------------------
-CREATE TABLE IF NOT EXISTS `artemis`.`itemvenda` (
-  `produto_proid` INT NULL DEFAULT NULL,
-  `itemvenda_venid` INT NOT NULL,
-  `itvqtde` INT NOT NULL,
-  `servico_serid` INT NULL DEFAULT NULL,
-  PRIMARY KEY (`itemvenda_venid`),
-  INDEX `fk_produto_has_venda_venda1_idx` (`itemvenda_venid` ASC) VISIBLE,
-  INDEX `fk_produto_has_venda_produto1_idx` (`produto_proid` ASC) VISIBLE,
-  INDEX `fk_itemvenda_servico1_idx` (`servico_serid` ASC) VISIBLE,
-  CONSTRAINT `fk_itemvenda_servico1`
-    FOREIGN KEY (`servico_serid`)
-    REFERENCES `artemis`.`servico` (`serid`),
-  CONSTRAINT `fk_produto_has_venda_produto1`
-    FOREIGN KEY (`produto_proid`)
-    REFERENCES `artemis`.`produto` (`proid`),
-  CONSTRAINT `fk_produto_has_venda_venda1`
-    FOREIGN KEY (`itemvenda_venid`)
-    REFERENCES `artemis`.`venda` (`venid`))
 ENGINE = InnoDB
 DEFAULT CHARACTER SET = utf8mb3;
 
@@ -1160,6 +1136,7 @@ end if;
 end ##
 delimiter ;
 
+
 DELIMITER $$
 CREATE PROCEDURE sp_finaliza_compra (pessoa_id INT, fpg int)
 BEGIN
@@ -1191,8 +1168,8 @@ if(pessoa_id in (select pesid from pessoa)) then
         
 		SET v_total = v_quantidade * v_preco;
 
-            INSERT INTO venda (venid,venser, venpro, venformapagamento_fpgid, venpessoa_pesid, venvalor)
-            SELECT carid,carser, carpro, fpg, pessoa_id, carpreco
+            INSERT INTO venda (venid,venser, venpro, venformapagamento_fpgid, venpessoa_pesid, venvalor,venqtd)
+            SELECT carid,carser, carpro, fpg, pessoa_id, carpreco, carquant
             FROM carrinho
             WHERE carid = v_carrinho_id;
 
@@ -1430,8 +1407,17 @@ INSERT INTO `artemis`.`pet_raca` (`ptrnome`, `pet_tipo_pttid`) VALUES ('Siamês'
 select carpes, sum(carpreco) as "Valor total" from carrinho
 group by carpes;
 
+select * from servico;
 select * from petshop;
 select * from pessoa;
 select * from produto;
 select * from carrinho;
 select * from venda;
+
+call sp_finaliza_compra (4,3);
+
+create view visualiza_forma_pagamento as
+select distinct(fpgdescricao) as "Formas de pagamento" from formapagamento
+group by fpgid, fpgdescricao;
+
+select * from visualiza_forma_pagamento;
