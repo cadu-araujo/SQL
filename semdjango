@@ -702,7 +702,18 @@ where pessoa_pesid = old.pesid;
 end$$
 DELIMITER ;
 
+delimiter $$
+create procedure sp_pessoa_endereco (pessoa int)
+begin
+if (pessoa in (select pesid from pessoa)) then
 
+	select concat("Bairro :",pesbairro," ;Rua: ", pesrua, " ;Numero: ",pesnumero,". ",pescidade,"/",pesestado) as "Endereço" from pessoa
+    where pesid = pessoa;
+else
+	select "Pessoa não existe";
+end if;
+end $$
+delimiter ;
 
 /* pet */
 
@@ -830,16 +841,16 @@ end$$
 DELIMITER ;
 
 DELIMITER $$
-CREATE PROCEDURE `sp_alteraproduto`(nome varchar(100), preco float, saldo int, petshop int, categoria int , cod int)
+CREATE PROCEDURE `sp_altera_produto`(nome varchar(100), preco float, saldo int, petshop int, categoria int , cod int)
 begin
 if (petshop in (select ptsid from petshop)) then
     if (categoria in (select ctpid from categoria_produto)) then
 	update produto
-	set ptsnome=nome,
+	set pronome=nome,
     propreco = preco,
     prosaldo = saldo,
     propetshop_ptsid = petshop,
-    prodtvalidade = validade
+    categoria_produto_ctpid = categoria
 	where cod=proid;
 else
       select "Categoria não existe";
@@ -877,6 +888,19 @@ else
  select "Produto não cadastrado";
 end if;
 
+end$$
+delimiter ;
+
+delimiter $$
+create procedure sp_altera_preco (produto int, preco float)
+begin
+if (produto in (select proid from produto)) then
+	update produto
+    set propreco = preco
+    where proid = produto;
+else
+ select "Produto não cadastrado";
+end if;
 end$$
 delimiter ;
 
@@ -935,7 +959,7 @@ end$$
 DELIMITER ;
 
 DELIMITER $$
-CREATE PROCEDURE `sp_alteraservico`(preco float, petshop int, tipo int, decsricao varchar (200), cod int)
+CREATE PROCEDURE `sp_altera_servico`(preco float, petshop int, tipo int, descricao varchar (200), cod int)
 begin
 if (tipo in (select tpsid from tiposervico )) then
 				if (petshop in (select ptsid from petshop)) then
@@ -1421,3 +1445,5 @@ select distinct(fpgdescricao) as "Formas de pagamento" from formapagamento
 group by fpgid, fpgdescricao;
 
 select * from visualiza_forma_pagamento;
+
+call sp_altera_produto ("Ração alterada",20.5,100,2,2,3);
