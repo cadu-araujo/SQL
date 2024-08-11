@@ -1013,6 +1013,17 @@ where servico_serid = old.serid;
 end$$
 delimiter ;
 
+delimiter $$
+create procedure sp_cidade_tpservico (tipo_servico int, cidade varchar(100))
+begin
+
+select tpsnome, tiposervico_tpsid, serdescricao, ptscidade from servico
+inner join tiposervico on tiposervico_tpsid = tpsid
+inner join petshop on ptsid = petshop_ptsid
+where cidade = ptscidade and tipo_servico =tiposervico_tpsid;
+
+end $$
+delimiter ;
 
 /* solicita */
 
