@@ -450,6 +450,7 @@ CREATE TABLE IF NOT EXISTS `artemis`.`solicita` (
   `solid` INT NOT NULL AUTO_INCREMENT,
   `soldthr` DATETIME NOT NULL,
   `solpetid` INT NOT NULL,
+  `solstatus` ENUM("Requerido", "Cancelado", "Concluído") NOT NULL,
   PRIMARY KEY (`solid`),
   INDEX `fk_pessoa_has_servico_servico1_idx` (`servico_serid` ASC) VISIBLE,
   INDEX `fk_pessoa_has_servico_pessoa1_idx` (`pessoa_pesid` ASC) VISIBLE,
@@ -803,6 +804,9 @@ where pet_petid = old.petid;
 delete from pet_adocao
 where pet_petid = old.petid;
 
+delete from solicita
+where solpetid = old.petid;
+
 end$$
 DELIMITER ;
 
@@ -1034,8 +1038,8 @@ begin
 		if(servico in (select serid from servico )) then
 			if(pet in (select petid from pet)) then
 				
-                insert into solicita (pessoa_pesid,servico_serid,soldthr,solpetid) values
-                (pessoa, servico, agendamento, pet);
+                insert into solicita (pessoa_pesid,servico_serid,soldthr,solpetid, solstatus) values
+                (pessoa, servico, agendamento, pet, "Requerido");
                 
 			else
 				select "Pessoa não existe";
@@ -1088,9 +1092,25 @@ begin
  end$$
 DELIMITER ;
 
+delimiter $$
+create procedure sp_altera_status_solicita (cod int, novo varchar(15))
+begin
+if (cod in (select solid from solicita)) then
+ if (upper(novo)in ("CANCELADO","CONCLUÍDO")) then
+	update solicita
+    set solstatus = novo
+    where solid = cod;
+ else
+	select "Opção inválida";
+ end if;
+ else
+	select "Solicitação inexistente";
+ end if;
+end$$
+delimiter ;
 /* carrinho */
 
-delimiter ##
+delimiter $$
 create procedure sp_total_carrinho (pessoa int)
 begin
 
@@ -1449,12 +1469,9 @@ select * from produto;
 select * from carrinho;
 select * from venda;
 
-call sp_finaliza_compra (4,3);
 
 create view visualiza_forma_pagamento as
 select distinct(fpgdescricao) as "Formas de pagamento" from formapagamento
 group by fpgid, fpgdescricao;
 
 select * from visualiza_forma_pagamento;
-
-call sp_altera_produto ("Ração alterada",20.5,100,2,2,3);
