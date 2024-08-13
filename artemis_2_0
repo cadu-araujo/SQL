@@ -1483,7 +1483,8 @@ begin
 if (cod in (select ttaid from tentativa_adota)) then
 	if(upper(novo) in ("REQUISITADO","ACEITO","NEGADO","ADOTADO","NÃO ADOTADO")) then
 		update tentativa_adota
-        set ttastatus = novo
+        set ttastatus = novo,
+        ttadthora = current_timestamp()
         where cod = ttaid;
     else
 		select "Valor inválido";
@@ -1491,19 +1492,6 @@ if (cod in (select ttaid from tentativa_adota)) then
 else
 	select "Tentativa de adoção não realizada";
 end if;
-end $$
-delimiter ;
-
-delimiter $$
-create trigger tg_atualiza_hr_adota
-after update on tentativa_adota
-for each row
-begin
-
-update tentativa_adota
-set ttadthora = current_timestamp()
-where ttaid = old.ttaid;
-
 end $$
 delimiter ;
 
@@ -1557,6 +1545,8 @@ select * from produto;
 select * from carrinho;
 select * from venda;
 select * from solicita;
+select * from ong;
+select * from tentativa_adota;
 
 create view visualiza_forma_pagamento as
 select distinct(fpgdescricao) as "Formas de pagamento" from formapagamento
