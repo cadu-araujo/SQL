@@ -472,6 +472,7 @@ CREATE TABLE IF NOT EXISTS `artemis`.`tentativa_adota` (
   `ttapes` INT NOT NULL,
   `tta_petadocao` INT NOT NULL,
   `ttastatus` ENUM("Requisitado", "Aceito", "Negado", "Adotado", "Não Adotado") NOT NULL,
+  `ttadthora` DATETIME NULL DEFAULT CURRENT_TIMESTAMP,
   PRIMARY KEY (`ttaid`),
   INDEX `ttapes` (`ttapes` ASC) VISIBLE,
   INDEX `tta_petadocao` (`tta_petadocao` ASC) VISIBLE,
@@ -487,7 +488,7 @@ DEFAULT CHARACTER SET = utf8mb3;
 /* avaliação */
 
 delimiter $$
-create procedure sp_insere_avaliacao (produto int, servico int, descricacao varchar(500), valor int, pessoa int)
+create procedure sp_insere_avaliacao (produto int, servico int, descricao varchar(500), valor int, pessoa int)
 begin
 if (pessoa in (select pesid from pessoa)) then
 	if((produto in (select proid from produto)) or (servico in(select serid from servico))) then
@@ -1493,6 +1494,19 @@ end if;
 end $$
 delimiter ;
 
+delimiter $$
+create trigger tg_atualiza_hr_adota
+after update on tentativa_adota
+for each row
+begin
+
+update tentativa_adota
+set ttadthora = current_timestamp()
+where ttaid = old.ttaid;
+
+end $$
+delimiter ;
+
 /* inserts subclasses*/
 
 select * from formapagamento;
@@ -1543,8 +1557,6 @@ select * from produto;
 select * from carrinho;
 select * from venda;
 select * from solicita;
-
-
 
 create view visualiza_forma_pagamento as
 select distinct(fpgdescricao) as "Formas de pagamento" from formapagamento
