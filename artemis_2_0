@@ -1527,13 +1527,14 @@ INSERT INTO `artemis`.`pet_porte` (`ptpnome`, `ptpdescricao`) VALUES ('Grande', 
 INSERT INTO `artemis`.`pet_porte` (`ptpnome`, `ptpdescricao`) VALUES ('Médio', 'normal');
 INSERT INTO `artemis`.`pet_porte` (`ptpnome`, `ptpdescricao`) VALUES ('Pequeno', 'nanico');
 
-INSERT INTO `artemis`.`pet_raca` (`ptrnome`, `pet_tipo_pttid`) VALUES ('vira-lata', '1');
-INSERT INTO `artemis`.`pet_raca` (`ptrnome`, `pet_tipo_pttid`) VALUES ('vira-lata', '2');
-INSERT INTO `artemis`.`pet_raca` (`ptrnome`, `pet_tipo_pttid`) VALUES ('buldog', '1');
-INSERT INTO `artemis`.`pet_raca` (`ptrnome`, `pet_tipo_pttid`) VALUES ('persa', '2');
-INSERT INTO `artemis`.`pet_raca` (`ptrnome`, `pet_tipo_pttid`) VALUES ('Pastor Alemão', '1');
-INSERT INTO `artemis`.`pet_raca` (`ptrnome`, `pet_tipo_pttid`) VALUES ('Rex', '3');
-INSERT INTO `artemis`.`pet_raca` (`ptrnome`, `pet_tipo_pttid`) VALUES ('Siamês', '2');
+INSERT INTO `artemis`.`pet_raca` (`ptrnome`, `pet_tipo_pttid`) VALUES ('vira-lata', '4');
+INSERT INTO `artemis`.`pet_raca` (`ptrnome`, `pet_tipo_pttid`) VALUES ('vira-lata', '5');
+INSERT INTO `artemis`.`pet_raca` (`ptrnome`, `pet_tipo_pttid`) VALUES ('buldog', '4');
+INSERT INTO `artemis`.`pet_raca` (`ptrnome`, `pet_tipo_pttid`) VALUES ('persa', '5');
+INSERT INTO `artemis`.`pet_raca` (`ptrnome`, `pet_tipo_pttid`) VALUES ('Pastor Alemão', '4');
+INSERT INTO `artemis`.`pet_raca` (`ptrnome`, `pet_tipo_pttid`) VALUES ('Rex', '6');
+INSERT INTO `artemis`.`pet_raca` (`ptrnome`, `pet_tipo_pttid`) VALUES ('Siamês', '5');
+
 
 select carpes, sum(carpreco) as "Valor total" from carrinho
 group by carpes;
