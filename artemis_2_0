@@ -1555,3 +1555,177 @@ group by fpgid, fpgdescricao;
 
 select * from visualiza_forma_pagamento;
 show create table solicita;
+
+-- DASHBOARDS --
+-- VENDA
+ delimiter $$
+ create procedure sp_venda_ano (ano year, petshop int)
+ begin
+if (pethsop in (select ptsid from petshop)) then
+	
+    select pronome as "Produto", pesnome as "Cliente", venqtd as  "Quantidade", venvalor as "Total", vendthora "Data e hora" from venda
+	inner join pessoa on pesid = venda.venpessoa_pesid
+	inner join produto on proid=venpro
+    where (petshop = propropetshop_ptsid) and (year(vendthora)= ano);
+    
+else
+	select "Petshop não existe";
+end if;
+ 
+end $$
+delimiter ;
+
+ delimiter $$
+ create procedure sp_venda_mes (mes int, ano year, petshop int)
+ begin
+if (pethsop in (select ptsid from petshop)) then
+	if (mes between 1 and 12) then
+    
+    select pronome as "Produto", pesnome as "Cliente", venqtd as  "Quantidade", venvalor as "Total", vendthora "Data e hora" from venda
+	inner join pessoa on pesid = venda.venpessoa_pesid
+	inner join produto on proid=venpro
+    where (petshop = propropetshop_ptsid) and ( (year(vendthora)= ano) and (month(vendthora)= mes));
+    
+    else
+		select "Mês inválido";
+	end if;
+else
+	select "Petshop não existe";
+end if;
+ 
+end $$
+delimiter ;
+
+ delimiter $$
+ create procedure sp_venda_produtos (petshop int)
+ begin
+if (pethsop in (select ptsid from petshop)) then
+    
+	select pronome as "Produto", sum(venqtd) as "Quantidade vendida", sum(venvalor) as "Valor arrecadado" from venda
+	inner join produto on proid = venpro
+    where propetshop_ptsid = petshop
+	group by proid
+	order by "Quantidade vendida" desc;
+    
+else
+	select "Petshop não existe";
+end if;
+ 
+end $$
+delimiter ;
+
+
+ delimiter $$
+ create procedure sp_produtos_avaliacao (petshop int)
+ begin
+if (pethsop in (select ptsid from petshop)) then
+    
+	select pronome as "Produto", avg(avavalor) as "Média das avaliações" from avaliacao
+	inner join produto on proid = avaliacao.produto_proid
+    where petshop = propetshop_ptsid
+	group by proid
+	order by "Média das avaliações" desc;
+    
+else
+	select "Petshop não existe";
+end if;
+end $$
+delimiter ;
+
+ delimiter $$
+ create procedure sp_servicos_petshop (petshop int, estado varchar(15))
+ begin
+if (pethsop in (select ptsid from petshop)) then
+    if (upper(estado) in ("REQUERIDO","CANCELADO","CONCLUÍDO")) then
+		select serdescricao as "Serviço", tpsnome "Tipo de serviço", count(servico_serid) as "Quantidade", solstatus as "Status" from solicita
+		inner join servico on serid = solicita.servico_serid
+		inner join tiposervico on tpsid =servico.tiposervico_tpsid
+        where petshop = servico.petshop_ptsid and estado = solstatus
+		group by solid, servico_serid
+		order by "Quantidade" desc;
+        
+    elseif (estado is null) then
+		select serdescricao as "Serviço", tpsnome "Tipo de serviço", count(servico_serid) as "Quantidade", solstatus as "Status" from solicita
+		inner join servico on serid = solicita.servico_serid
+		inner join tiposervico on tpsid =servico.tiposervico_tpsid
+        where petshop = servico.petshop_ptsid
+		group by solid, servico_serid
+		order by "Quantidade" desc;
+    else
+		select "Status inválido";
+	end if;
+else
+	select "Petshop não existe";
+end if;
+end $$
+delimiter ;
+
+-- ADOÇÃO
+
+ delimiter $$
+ create procedure sp_adocao_estado (ong int, estado varchar(15))
+ begin
+if (ong in (select ongid from ong)) then
+   if (estado in ('Requisitado','Aceito','Negado','Adotado','Não Adotado')) then
+		
+        select petnome as "Pet", pttnome as "Tipo", ptrnome as "Raça", ttastatus as  "status", ttadthora as "Data e hora" from tentativa_adota
+		inner join pet_adocao on adoid = tta_petadocao
+		inner join pet on petid = pet_adocao.pet_petid
+		inner join pet_tipo on pet_tipo_pttid = pttid
+		inner join pet_raca on pet_raca_ptrid = ptrid
+        where pet_adocao.ong_ongid = ong and estado=ttastatus;
+        
+	else
+		select "Status inválido";
+    end if;
+else
+	select "Ong não existe";
+end if;
+end $$
+delimiter ;
+
+
+ delimiter $$
+ create procedure sp_adocao_data (ong int, mes int, ano year)
+ begin
+if (ong in (select ongid from ong)) then
+   if(mes between 1 and 12) then
+   
+		select petnome as "Pet", pttnome as "Tipo", ptrnome as "Raça", ttastatus as  "status", ttadthora as "Data e hora" from tentativa_adota
+		inner join pet_adocao on adoid = tta_petadocao
+		inner join pet on petid = pet_adocao.pet_petid
+		inner join pet_tipo on pet_tipo_pttid = pttid
+		inner join pet_raca on pet_raca_ptrid = ptrid
+        where pet_adocao.ong_ongid = ong and ( (year(ttadthora)= ano) and (month(ttadthora)= mes));
+   
+   else
+	select "Mês inválido";
+   end if;
+else
+	select "Ong não existe";
+end if;
+end $$
+delimiter ;
+
+
+ delimiter $$
+ create procedure sp_adocao_bicho (ong int, tipo varchar (20))
+ begin
+if (ong in (select ongid from ong)) then
+   if (tipo in (select pttnome from pet_tipo)) then
+		
+        select petnome as "Pet", pttnome as "Tipo", ptrnome as "Raça", ttastatus as  "status", ttadthora as "Data e hora" from tentativa_adota
+		inner join pet_adocao on adoid = tta_petadocao
+		inner join pet on petid = pet_adocao.pet_petid
+		inner join pet_tipo on pet_tipo_pttid = pttid
+		inner join pet_raca on pet_raca_ptrid = ptrid
+        where pet_adocao.ong_ongid = ong and pttnome = tipo;
+        
+   else
+		select "Tipo não existe";
+	end if;
+else
+	select "Ong não existe";
+end if;
+end $$
+delimiter ;
