@@ -246,51 +246,6 @@ DEFAULT CHARACTER SET = utf8mb3;
 
 
 -- -----------------------------------------------------
--- Table `artemis`.`login`
--- -----------------------------------------------------
-CREATE TABLE IF NOT EXISTS `artemis`.`login` (
-  `logemail` VARCHAR(70) NOT NULL,
-  `logsenha` VARCHAR(45) NULL DEFAULT NULL,
-  `petshop_ptsid` INT NULL DEFAULT NULL,
-  `pessoa_pesid` INT NULL DEFAULT NULL,
-  `ong_ongid` INT NULL DEFAULT NULL,
-  PRIMARY KEY (`logemail`),
-  INDEX `fk_login_petshop1_idx` (`petshop_ptsid` ASC) VISIBLE,
-  INDEX `fk_login_pessoa1_idx` (`pessoa_pesid` ASC) VISIBLE,
-  INDEX `fk_login_ong1_idx` (`ong_ongid` ASC) VISIBLE,
-  CONSTRAINT `fk_login_ong1`
-    FOREIGN KEY (`ong_ongid`)
-    REFERENCES `artemis`.`ong` (`ongid`),
-  CONSTRAINT `fk_login_pessoa1`
-    FOREIGN KEY (`pessoa_pesid`)
-    REFERENCES `artemis`.`pessoa` (`pesid`),
-  CONSTRAINT `fk_login_petshop1`
-    FOREIGN KEY (`petshop_ptsid`)
-    REFERENCES `artemis`.`petshop` (`ptsid`))
-ENGINE = InnoDB
-DEFAULT CHARACTER SET = utf8mb3;
-
-
--- -----------------------------------------------------
--- Table `artemis`.`notafiscal`
--- -----------------------------------------------------
-CREATE TABLE IF NOT EXISTS `artemis`.`notafiscal` (
-  `petshop_ptsid` INT NOT NULL,
-  `venda_venid` INT NOT NULL,
-  `ntfcod` INT NOT NULL,
-  INDEX `fk_notaFiscal_petshop_idx` (`petshop_ptsid` ASC) VISIBLE,
-  INDEX `fk_notaFiscal_venda1_idx` (`venda_venid` ASC) VISIBLE,
-  CONSTRAINT `fk_notaFiscal_petshop`
-    FOREIGN KEY (`petshop_ptsid`)
-    REFERENCES `artemis`.`petshop` (`ptsid`),
-  CONSTRAINT `fk_notaFiscal_venda1`
-    FOREIGN KEY (`venda_venid`)
-    REFERENCES `artemis`.`venda` (`venid`))
-ENGINE = InnoDB
-DEFAULT CHARACTER SET = utf8mb3;
-
-
--- -----------------------------------------------------
 -- Table `artemis`.`pet_porte`
 -- -----------------------------------------------------
 CREATE TABLE IF NOT EXISTS `artemis`.`pet_porte` (
@@ -378,6 +333,7 @@ CREATE TABLE IF NOT EXISTS `artemis`.`pet_adocao` (
   `ong_ongid` INT NOT NULL,
   `pet_petid` INT NOT NULL,
   `adoid` INT NOT NULL AUTO_INCREMENT,
+  `adostatus` ENUM("Aguardando","Adotado") NOT NULL,
   PRIMARY KEY (`adoid`),
   INDEX `fk_pet_adocao_ong1_idx` (`ong_ongid` ASC) VISIBLE,
   INDEX `fk_pet_adocao_pet1` (`pet_petid` ASC) VISIBLE,
@@ -423,23 +379,6 @@ CREATE TABLE IF NOT EXISTS `artemis`.`produto_foto` (
     REFERENCES `artemis`.`produto` (`proid`))
 ENGINE = InnoDB
 DEFAULT CHARACTER SET = utf8mb3;
-
-
--- -----------------------------------------------------
--- Table `artemis`.`servico_foto`
--- -----------------------------------------------------
-CREATE TABLE IF NOT EXISTS `artemis`.`servico_foto` (
-  `serftid` INT NOT NULL AUTO_INCREMENT,
-  `serftvalor` VARCHAR(100) NOT NULL,
-  `servico_serid` INT NOT NULL,
-  PRIMARY KEY (`serftid`),
-  INDEX `fk_servico_foto_servico1_idx` (`servico_serid` ASC) VISIBLE,
-  CONSTRAINT `fk_servico_foto_servico1`
-    FOREIGN KEY (`servico_serid`)
-    REFERENCES `artemis`.`servico` (`serid`))
-ENGINE = InnoDB
-DEFAULT CHARACTER SET = utf8mb3;
-
 
 -- -----------------------------------------------------
 -- Table `artemis`.`solicita`
@@ -1449,19 +1388,6 @@ end $$
 delimiter ;
 
 delimiter $$
-create procedure sp_exclui_pet_adocao (cod int)
-begin
-	if (cod in (select pet_petid from pet_petid)) then
-		
-        delete from pet_adocao
-        where adoid = cod;
-    else
-		select "Adoção nã cadastrada";
-    end if;
-end $$
-delimiter ;
-
-delimiter $$
 create procedure sp_inicia_adocao (pessoa int, adocao int)
 begin
 if (pessoa in (select pesid from pessoa)) then
@@ -1491,6 +1417,20 @@ if (cod in (select ttaid from tentativa_adota)) then
     end if;
 else
 	select "Tentativa de adoção não realizada";
+end if;
+end $$
+delimiter ;
+
+delimiter $$
+create trigger tg_tira_pet_adocao
+after update on tentativa_adota
+for each row
+begin
+
+if (new.ttastatus = "Adotado") then
+	update pet_adocao
+	set adostatus = "Adotado"
+	where adoid = new.tta_petadocao;
 end if;
 end $$
 delimiter ;
@@ -1561,12 +1501,12 @@ show create table solicita;
  delimiter $$
  create procedure sp_venda_ano (ano year, petshop int)
  begin
-if (pethsop in (select ptsid from petshop)) then
+if (petshop in (select ptsid from petshop)) then
 	
     select pronome as "Produto", pesnome as "Cliente", venqtd as  "Quantidade", venvalor as "Total", vendthora "Data e hora" from venda
 	inner join pessoa on pesid = venda.venpessoa_pesid
 	inner join produto on proid=venpro
-    where (petshop = propropetshop_ptsid) and (year(vendthora)= ano);
+    where (petshop = propetshop_ptsid) and (year(vendthora)= ano);
     
 else
 	select "Petshop não existe";
@@ -1578,7 +1518,7 @@ delimiter ;
  delimiter $$
  create procedure sp_venda_mes (mes int, ano year, petshop int)
  begin
-if (pethsop in (select ptsid from petshop)) then
+if (petshop in (select ptsid from petshop)) then
 	if (mes between 1 and 12) then
     
     select pronome as "Produto", pesnome as "Cliente", venqtd as  "Quantidade", venvalor as "Total", vendthora "Data e hora" from venda
@@ -1599,13 +1539,13 @@ delimiter ;
  delimiter $$
  create procedure sp_venda_produtos (petshop int)
  begin
-if (pethsop in (select ptsid from petshop)) then
+if (petshop in (select ptsid from petshop)) then
     
 	select pronome as "Produto", sum(venqtd) as "Quantidade vendida", sum(venvalor) as "Valor arrecadado" from venda
 	inner join produto on proid = venpro
     where propetshop_ptsid = petshop
 	group by proid
-	order by "Quantidade vendida" desc;
+	order by sum(venqtd) desc;
     
 else
 	select "Petshop não existe";
@@ -1618,13 +1558,13 @@ delimiter ;
  delimiter $$
  create procedure sp_produtos_avaliacao (petshop int)
  begin
-if (pethsop in (select ptsid from petshop)) then
+if (petshop in (select ptsid from petshop)) then
     
 	select pronome as "Produto", avg(avavalor) as "Média das avaliações" from avaliacao
 	inner join produto on proid = avaliacao.produto_proid
     where petshop = propetshop_ptsid
 	group by proid
-	order by "Média das avaliações" desc;
+	order by avg(avavalor) desc;
     
 else
 	select "Petshop não existe";
@@ -1635,14 +1575,14 @@ delimiter ;
  delimiter $$
  create procedure sp_servicos_petshop (petshop int, estado varchar(15))
  begin
-if (pethsop in (select ptsid from petshop)) then
+if (petshop in (select ptsid from petshop)) then
     if (upper(estado) in ("REQUERIDO","CANCELADO","CONCLUÍDO")) then
 		select serdescricao as "Serviço", tpsnome "Tipo de serviço", count(servico_serid) as "Quantidade", solstatus as "Status" from solicita
 		inner join servico on serid = solicita.servico_serid
 		inner join tiposervico on tpsid =servico.tiposervico_tpsid
         where petshop = servico.petshop_ptsid and estado = solstatus
 		group by solid, servico_serid
-		order by "Quantidade" desc;
+		order by count(servico_serid) desc;
         
     elseif (estado is null) then
 		select serdescricao as "Serviço", tpsnome "Tipo de serviço", count(servico_serid) as "Quantidade", solstatus as "Status" from solicita
@@ -1650,7 +1590,7 @@ if (pethsop in (select ptsid from petshop)) then
 		inner join tiposervico on tpsid =servico.tiposervico_tpsid
         where petshop = servico.petshop_ptsid
 		group by solid, servico_serid
-		order by "Quantidade" desc;
+		order by count(servico_serid) desc;
     else
 		select "Status inválido";
 	end if;
@@ -1726,6 +1666,50 @@ if (ong in (select ongid from ong)) then
 	end if;
 else
 	select "Ong não existe";
+end if;
+end $$
+delimiter ;
+
+-- Pessoa
+
+delimiter $$
+create procedure sp_gastos_produto_data (pessoa int, mes int, ano year)
+begin
+if (pessoa in(select pesid from pessoa)) then
+   if (mes between 1 and 12) then
+   
+		select pesnome as "Pessoa", pronome as "Produto", venqtd as "Quantidade", propreco as "Preço", venvalor as "Valor", vendthora as "Data e hora" from venda
+		inner join produto on proid = venpro
+		inner join pessoa on pesid = venpessoa_pesid
+        where ((mes = month(vendthora) and ano = year(vendthora)) and (pessoa = venpessoa_pesid));
+
+	else
+		select "Mês inválido";
+	end if;
+else
+	select "Pessoa não existe";
+end if;
+end $$
+delimiter ;
+
+
+
+delimiter $$
+create procedure sp_gastos_servico_data (pessoa int, mes int, ano year)
+begin
+if (pessoa in(select pesid from pessoa)) then
+   if (mes between 1 and 12) then
+
+	select tpsnome as "Tipo", serdescricao as "Descrição", servalor as "Preço", soldthr as "Data e hora" from solicita
+	inner join servico on serid = solicita.servico_serid
+	inner join tiposervico on tpsid = tiposervico_tpsid
+    where (pessoa = solicita.pessoa_pesid) and (solstatus in("Concluído")) and ((mes = month(soldthr)) and (ano = year(soldthr)));
+
+	else
+		select "Mês inválido";
+	end if;
+else
+	select "Pessoa não existe";
 end if;
 end $$
 delimiter ;
