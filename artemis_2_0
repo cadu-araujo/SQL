@@ -263,7 +263,7 @@ DEFAULT CHARACTER SET = utf8mb3;
 -- Table `artemis`.`pet_tipo`
 -- -----------------------------------------------------
 CREATE TABLE IF NOT EXISTS `artemis`.`pet_tipo` (
-  `pttid` INT NOT NULL AUTO_INCREMENT,
+  `pttid` INT NOT NULL,
   `pttnome` VARCHAR(60) NOT NULL,
   PRIMARY KEY (`pttid`),
   UNIQUE INDEX `pttid_UNIQUE` (`pttid` ASC) VISIBLE)
@@ -276,7 +276,7 @@ DEFAULT CHARACTER SET = utf8mb3;
 -- Table `artemis`.`pet_raca`
 -- -----------------------------------------------------
 CREATE TABLE IF NOT EXISTS `artemis`.`pet_raca` (
-  `ptrid` INT NOT NULL AUTO_INCREMENT,
+  `ptrid` INT NOT NULL auto_increment,
   `ptrnome` VARCHAR(65) NULL DEFAULT NULL,
   `pet_tipo_pttid` INT NOT NULL,
   PRIMARY KEY (`ptrid`),
@@ -333,7 +333,7 @@ CREATE TABLE IF NOT EXISTS `artemis`.`pet_adocao` (
   `ong_ongid` INT NOT NULL,
   `pet_petid` INT NOT NULL,
   `adoid` INT NOT NULL AUTO_INCREMENT,
-  `adostatus` ENUM("Aguardando","Adotado") NOT NULL,
+  `adostatus` ENUM("Aguardando","Adotado") NOT NULL default "Aguardando",
   PRIMARY KEY (`adoid`),
   INDEX `fk_pet_adocao_ong1_idx` (`ong_ongid` ASC) VISIBLE,
   INDEX `fk_pet_adocao_pet1` (`pet_petid` ASC) VISIBLE,
@@ -1458,22 +1458,22 @@ INSERT INTO `artemis`.`categoria_produto` (`ctpnome`, `ctpdescricao`) VALUES ('C
 INSERT INTO `artemis`.`categoria_produto` (`ctpnome`, `ctpdescricao`) VALUES ('Para Cães', 'Usados por cães');
 INSERT INTO `artemis`.`categoria_produto` (`ctpnome`, `ctpdescricao`) VALUES ('Para Gatos', 'Usados por gatos');
 
-INSERT INTO `artemis`.`pet_tipo` (`pttnome`) VALUES ('Cão');
-INSERT INTO `artemis`.`pet_tipo` (`pttnome`) VALUES ('Gato');
-INSERT INTO `artemis`.`pet_tipo` (`pttnome`) VALUES ('Coelho');
-INSERT INTO `artemis`.`pet_tipo` (`pttnome`) VALUES ('Papagaio');
+INSERT INTO `artemis`.`pet_tipo` (`pttnome`, pttid) VALUES ('Cão',1);
+INSERT INTO `artemis`.`pet_tipo` (`pttnome`, pttid) VALUES ('Gato', 2);
+INSERT INTO `artemis`.`pet_tipo` (`pttnome`, pttid) VALUES ('Coelho',3);
+INSERT INTO `artemis`.`pet_tipo` (`pttnome`, pttid) VALUES ('Papagaio', 4);
 
 INSERT INTO `artemis`.`pet_porte` (`ptpnome`, `ptpdescricao`) VALUES ('Grande', 'masseta');
 INSERT INTO `artemis`.`pet_porte` (`ptpnome`, `ptpdescricao`) VALUES ('Médio', 'normal');
 INSERT INTO `artemis`.`pet_porte` (`ptpnome`, `ptpdescricao`) VALUES ('Pequeno', 'nanico');
 
-INSERT INTO `artemis`.`pet_raca` (`ptrnome`, `pet_tipo_pttid`) VALUES ('vira-lata', '4');
-INSERT INTO `artemis`.`pet_raca` (`ptrnome`, `pet_tipo_pttid`) VALUES ('vira-lata', '5');
-INSERT INTO `artemis`.`pet_raca` (`ptrnome`, `pet_tipo_pttid`) VALUES ('buldog', '4');
-INSERT INTO `artemis`.`pet_raca` (`ptrnome`, `pet_tipo_pttid`) VALUES ('persa', '5');
-INSERT INTO `artemis`.`pet_raca` (`ptrnome`, `pet_tipo_pttid`) VALUES ('Pastor Alemão', '4');
+INSERT INTO `artemis`.`pet_raca` (`ptrnome`, `pet_tipo_pttid`) VALUES ('vira-lata', '1');
+INSERT INTO `artemis`.`pet_raca` (`ptrnome`, `pet_tipo_pttid`) VALUES ('vira-lata', '2');
+INSERT INTO `artemis`.`pet_raca` (`ptrnome`, `pet_tipo_pttid`) VALUES ('buldog', '1');
+INSERT INTO `artemis`.`pet_raca` (`ptrnome`, `pet_tipo_pttid`) VALUES ('persa', '1');
+INSERT INTO `artemis`.`pet_raca` (`ptrnome`, `pet_tipo_pttid`) VALUES ('Pastor Alemão', '1');
 INSERT INTO `artemis`.`pet_raca` (`ptrnome`, `pet_tipo_pttid`) VALUES ('Rex', '6');
-INSERT INTO `artemis`.`pet_raca` (`ptrnome`, `pet_tipo_pttid`) VALUES ('Siamês', '5');
+INSERT INTO `artemis`.`pet_raca` (`ptrnome`, `pet_tipo_pttid`) VALUES ('Siamês', '2');
 
 
 select carpes, sum(carpreco) as "Valor total" from carrinho
